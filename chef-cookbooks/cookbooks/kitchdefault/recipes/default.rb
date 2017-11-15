@@ -9,9 +9,26 @@
 include_recipe 'chocolatey'
 
 # Install Choco Stuff
-chocolatey_package 'terraform'
-chocolatey_package 'visualstudiocode'
-chocolatey_package 'notepadplusplus.install'
-chocolatey_package 'vagrant'
-chocolatey_package 'poshgit'
-chocolatey_package 'docker'
+chocolatey_package 'terraform' do 
+  action :install
+end
+
+# Chocolatey_package 'visualstudiocode'
+chocolatey_package 'notepadplusplus.install' do
+  action :install
+end
+
+chocolatey_package 'vagrant' do
+  action :install
+end
+chocolatey_package 'poshgit' do
+  action :install
+end
+chocolatey_package 'docker' do
+  action :install
+end
+
+# Powershell Profile
+template 'C:/Users/danki/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1' do
+  source 'powershellprofile.ps1.erb'
+end

@@ -1,0 +1,51 @@
+Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-a4faccd\src\posh-git.psd1'
+if(Test-Path Function:\Prompt) {Rename-Item Function:\Prompt PrePoshHGPrompt -Force}
+if(!(Test-Path function:\TabExpansion)) { New-Item function:\Global:TabExpansion -value '' | Out-Null }
+
+# Load posh-hg example profile
+. 'C:\ProgramData\chocolatey\lib\Posh-HG\JeremySkinner-posh-hg-e273b0d\profile.example.ps1'
+
+Rename-Item Function:\Prompt PoshHGPrompt -Force
+function Prompt() {if(Test-Path Function:\PrePoshHGPrompt){++$global:poshScope; New-Item function:\script:Write-host -value "param([object] `$object, `$backgroundColor, `$foregroundColor, [switch] `$nonewline) " -Force | Out-Null;$private:p = PrePoshHGPrompt; if(--$global:poshScope -eq 0) {Remove-Item function:\Write-Host -Force}}PoshHGPrompt}
+
+Import-Module AWSPowerShell
+
+Set-Alias np c:\windows\notepad.exe
+Set-Alias tf terraform
+Set-Alias aws aws.exe
+
+Import-Module posh-git
+
+# Update path for SSH (Loaded in PowerShell Profile)
+$env:path += ";" + (Get-Item "Env:ProgramFiles").Value + "\Git\bin"
+$env:path += ";" + (Get-Item "Env:ProgramFiles").Value + "\Git\usr\bin"
+
+# Load SSH agent utils
+. (Resolve-Path ~/Documents/WindowsPowershell/ssh-agent-utils.ps1)
+
+# Spoof terminal environment for git color.
+$env:TERM = 'cygwin'
+
+Pop-Location
+
+Add-SshKey
+# Chocolatey profile
+$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+if (Test-Path($ChocolateyProfile)) {
+  Import-Module "$ChocolateyProfile"
+}
+
+# Setup maven
+if($Env:M2_HOME){
+    # Fast builds with no tests, but multithreading
+    function mvn-mt{
+        $cmd = "`'$Env:M2_HOME\bin\mvn.cmd`' -TC1 -DskipTests $args"
+        Invoke-Expression "& $cmd"
+    }
+    function mvn{
+        $cmd = "`'$Env:M2_HOME\bin\mvn.cmd`' $args"
+        Invoke-Expression "& $cmd"
+    }
+} else {
+    Write-Host "M2_HOME is not set in the environment, verify Maven installation and set M2_HOME" -ForegroundColor Red
+}

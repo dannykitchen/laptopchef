@@ -10,7 +10,7 @@
   },
   "chef_type": "role",
   "run_list": [
-    "recipe[chef-client::windows_service]",
+    "kitchdefault::default",
     "chocolatey::default"	
   ],
   "env_run_lists": {
